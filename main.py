@@ -14,9 +14,10 @@ positions = list()
 
 clock = pygame.time.Clock()
 
-screen = pygame.display.set_mode((400, 400))
+screen = pygame.display.set_mode((600, 400))
 screen.fill((25, 25, 25))
 pygame.display.set_caption("Sierpinski Hexagon")
+font = pygame.font.SysFont('Arial', 25)
 
 running = True
 start = True
@@ -29,17 +30,6 @@ class Dot(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = position
         
-# Make the hexagon (index --> num)
-
-# positions.extend([(133, 100), (266, 100), (66, 200), (336, 200), (133, 300), (266, 300)])
-# main_dots.append([pygame.sprite.GroupSingle(Dot((133, 100), main_dot_size)), (133, 100)]) # 0 --> 1
-# main_dots.append([pygame.sprite.GroupSingle(Dot((266, 100), main_dot_size)), (266, 100)]) # 1 --> 2
-
-# main_dots.append([pygame.sprite.GroupSingle(Dot((66, 200), main_dot_size)), (66, 200)])  # 2 --> 3
-# main_dots.append([pygame.sprite.GroupSingle(Dot((336, 200), main_dot_size)), (336, 200)]) # 3 --> 4
-
-# main_dots.append([pygame.sprite.GroupSingle(Dot((133, 300), main_dot_size)), (133, 300)]) # 4 --> 5
-# main_dots.append([pygame.sprite.GroupSingle(Dot((266, 300), main_dot_size)), (266, 300)]) # 5 --> 6
 
 dot_num = 5000
 i = 0
@@ -58,8 +48,6 @@ def draw_line(s_p, e_p, d):
     pygame.time.delay(d)
 
 
-
-
 def erase_line(s_p, e_p, d, dt):
     pygame.display.update()
     pygame.time.delay(d)
@@ -69,6 +57,7 @@ def erase_line(s_p, e_p, d, dt):
 
     pygame.display.update()
     pygame.time.delay(d)
+
 
 def draw_ngon(n, radius, p):
     pi2 = 2 * 3.14
@@ -81,13 +70,45 @@ def draw_ngon(n, radius, p):
         dot = pygame.sprite.GroupSingle(Dot((x, y), main_dot_size))
         dot.draw(screen)
 
+def calculate_button_render():
+    pygame.draw.rect(screen, (25, 25, 25), pygame.Rect(425, 25, 150, 50))
+    btn_text = font.render('Calculate', True, (255, 255, 255))
+    btn_text_rect = btn_text.get_rect()
+    btn_text_rect.center = (500, 50)
+    screen.blit(btn_text, btn_text_rect)
+
+def reset_button_render():
+    pygame.draw.rect(screen, (25, 25, 25), pygame.Rect(425, 100, 150, 50))
+    btn_text = font.render('Reset', True, (255, 255, 255))
+    btn_text_rect = btn_text.get_rect()
+    btn_text_rect.center = (500, 125)
+    screen.blit(btn_text, btn_text_rect)
+
+pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(400, 0, 200, 400))
 draw_ngon(6, 150, (200, 200))
+calculate_button_render()
+reset_button_render()
+
+pressed = False
+start = False
 
 while running:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+    if pygame.mouse.get_pressed()[0]:
+        pos = pygame.mouse.get_pos()
+        if (425 < pos[0] < 575) and (25 < pos[1] < 75) and not pressed:
+            pressed = True
+            start = True
+
+        elif (425 < pos[0] < 575) and (100 < pos[1] < 150) and pressed:
+            pressed = False
+            start = False
+            pygame.draw.rect(screen, (25, 25, 25), pygame.Rect(0, 0, 400, 400))
+            draw_ngon(6, 150, (200, 200))
 
     if start:
 
@@ -98,12 +119,10 @@ while running:
         line_start_pos = start_pos
 
         rand_point = random.choice(positions)
-        if animation_delay: draw_line(line_start_pos, rand_point, animation_delay)
+        if i < 500: draw_line(line_start_pos, rand_point, animation_delay)
 
         # x = (((1/3) * X1) + ((2/3) * X2))
         # y = (((1/3) * Y1) + ((2/3) * Y2))
-        
-
         x = ((1/3) * start_pos[0]) + ((2/3) * rand_point[0])
         y = ((1/3) * start_pos[1]) + ((2/3) * rand_point[1])
 
